@@ -324,6 +324,7 @@ void loop()
 			{
 				char c = client.read();
 				Serial.write(c);
+				header += c;
 				if (c == '\n')
 				{
 					if (currentLine.length() == 0)
@@ -333,13 +334,11 @@ void loop()
 						client.println("Connection: close");
 						client.println();
 
-
 						if (header.indexOf("GET /toggle-table") >= 0)
 						{
 							toggleTableOnline = true;
 						}
 
-						
 						client.println("<!DOCTYPE html><html>");
 						client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
 						client.println("<link rel=\"icon\" href=\"data:,\">");
