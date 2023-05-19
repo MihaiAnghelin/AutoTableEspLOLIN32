@@ -336,7 +336,10 @@ void loop()
 
 						if (header.indexOf("GET /toggle-table") >= 0)
 						{
-							toggleTableOnline = true;
+							if (digitalRead(POW_IN) != HIGH)
+							{
+								toggleTableOnline = true;
+							}
 						}
 
 						client.println("<!DOCTYPE html><html>");
