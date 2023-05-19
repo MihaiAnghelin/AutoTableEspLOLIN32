@@ -333,23 +333,22 @@ void loop()
 							toggleTableOnline = true;
 						}
 
-						// client.println("HTTP/1.1 200 OK");
-						// client.println("Content-type:text/html");
-						// client.println("Connection: close");
-						// client.println();
-						// client.println("<!DOCTYPE html><html>");
-						// client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-						// client.println("<link rel=\"icon\" href=\"data:,\">");
-						// client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
-						// client.println(".button { background-color: #195B6A; border: none; color: white; padding: 16px 40px;");
-						// client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
-						// client.println(".button2 {background-color: #77878A;}</style></head>");
-						// client.println("<body><h1>ESP32 Web Server</h1>");
-						// client.println("<p>Click to open or close the table.</p>");
-						// client.println("<p><a href=\"/open\"><button class=\"button\">OPEN</button></a></p>");
-						// client.println("<p><a href=\"/close\"><button class=\"button\">CLOSE</button></a></p>");
-						// client.println("</body></html>");
-						// client.println();
+						client.println("HTTP/1.1 200 OK");
+						client.println("Content-type:text/html");
+						client.println("Connection: close");
+						client.println();
+						client.println("<!DOCTYPE html><html>");
+						client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
+						client.println("<link rel=\"icon\" href=\"data:,\">");
+						client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
+						client.println(".button { background-color: #195B6A; border: none; color: white; padding: 16px 40px;");
+						client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
+						client.println(".button2 {background-color: #77878A;}</style></head>");
+						client.println("<body><h1>ESP32 Web Server</h1>");
+						client.println("<p>Click to open or close the table.</p>");
+						client.println("<p><a href=\"/toggle-table\"><button class=\"button\">TOGGLE</button></a></p>");
+						client.println("</body></html>");
+						client.println();
 						break;
 					}
 					else
