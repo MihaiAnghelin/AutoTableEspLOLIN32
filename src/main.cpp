@@ -25,6 +25,8 @@
 #define MAX_POS 21200
 #define MIN_POS 0
 
+#define LED_BUILTIN 5
+
 long pos = 0;
 long previousTime = 0;
 float errorPrevious = 0;
@@ -249,7 +251,9 @@ void openCloseButtons()
 
 void setup()
 {
-	///Conexiune Wi-Fi
+
+	pinMode(LED_BUILTIN, OUTPUT);
+	/// Conexiune Wi-Fi
 	Serial.begin(115200);
 
 	WiFi.mode(WIFI_STA);
@@ -258,14 +262,19 @@ void setup()
 
 	while (WiFi.status() != WL_CONNECTED)
 	{
+		digitalWrite(LED_BUILTIN, HIGH);
 		Serial.print(".");
 		delay(100);
+		digitalWrite(LED_BUILTIN, LOW);
+		delay(100);
 	}
+
+	digitalWrite(LED_BUILTIN, LOW);
 
 	Serial.println("\nConnected to the WiFi network");
 	Serial.print("Local ESP32 IP: ");
 	Serial.println(WiFi.localIP());
-	///Configurare pini
+	/// Configurare pini
 
 	pinMode(IN1, OUTPUT);
 	pinMode(IN2, OUTPUT);
