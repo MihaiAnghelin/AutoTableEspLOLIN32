@@ -42,6 +42,12 @@ bool closeTable = false;
 const char *ssid = "DIGI-D5bj";
 const char *password = "2874qX3n";
 
+WiFiServer server(80);
+
+String header;
+
+bool toggleTableOnline = false;
+
 #pragma region Motor
 
 #define FORWARD -1
@@ -137,7 +143,7 @@ void PID()
 
 void oneButton()
 {
-	if (digitalRead(BTN1_IN) == LOW)
+	if (digitalRead(BTN1_IN) == LOW || toggleTableOnline)
 	{
 		isRunning = !isRunning;
 	}
@@ -168,6 +174,7 @@ void oneButton()
 		}
 
 		isRunning = false;
+		toggleTableOnline = false;
 	}
 	else
 	{
@@ -276,6 +283,9 @@ void setup()
 	Serial.println("\nConnected to the WiFi network");
 	Serial.print("Local ESP32 IP: ");
 	Serial.println(WiFi.localIP());
+
+	server.begin();
+
 	/// Configurare pini
 
 	pinMode(IN1, OUTPUT);
@@ -302,6 +312,61 @@ void setup()
 
 void loop()
 {
+	WiFiClient client = server.available();
+
+	if (client)
+	{
+		Serial.println("New Client.");
+		String currentLine = "";
+		while (client.connected())
+		{
+			if (client.available())
+			{
+				char c = client.read();
+				Serial.write(c);
+				if (c == '\n')
+				{
+					if (currentLine.length() == 0)
+					{
+						if (header.indexOf("GET /toggle-table") >= 0)
+						{
+							toggleTableOnline = true;
+						}
+
+						// client.println("HTTP/1.1 200 OK");
+						// client.println("Content-type:text/html");
+						// client.println("Connection: close");
+						// client.println();
+						// client.println("<!DOCTYPE html><html>");
+						// client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
+						// client.println("<link rel=\"icon\" href=\"data:,\">");
+						// client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
+						// client.println(".button { background-color: #195B6A; border: none; color: white; padding: 16px 40px;");
+						// client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
+						// client.println(".button2 {background-color: #77878A;}</style></head>");
+						// client.println("<body><h1>ESP32 Web Server</h1>");
+						// client.println("<p>Click to open or close the table.</p>");
+						// client.println("<p><a href=\"/open\"><button class=\"button\">OPEN</button></a></p>");
+						// client.println("<p><a href=\"/close\"><button class=\"button\">CLOSE</button></a></p>");
+						// client.println("</body></html>");
+						// client.println();
+						break;
+					}
+					else
+					{
+						currentLine = "";
+					}
+				}
+				else if (c != '\r')
+				{
+					currentLine += c;
+				}
+			}
+		}
+		client.stop();
+		Serial.println("Client disconnected.");
+	}
+
 	// PID();
 
 	// if the power button is turned off the motor will not be available
