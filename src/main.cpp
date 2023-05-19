@@ -22,7 +22,7 @@
 #define POW_IN 22
 #define POW_OUT 21
 
-#define MAX_POS 21200
+#define MAX_POS -21200
 #define MIN_POS 0
 
 #define LED_BUILTIN 5
@@ -39,8 +39,8 @@ bool openTable = false;
 bool closeTable = false;
 
 /// Cont wifi
-const char *ssid = "Redmi";
-const char *password = "luigi123";
+const char *ssid = "DIGI-D5bj";
+const char *password = "2874qX3n";
 
 #pragma region Motor
 
@@ -146,7 +146,7 @@ void oneButton()
 	{
 		if (!isOpen)
 		{
-			while (pos < MAX_POS)
+			while (pos > MAX_POS)
 			{
 				setMotor(BACKWARD, 255);
 
@@ -157,7 +157,7 @@ void oneButton()
 		}
 		else
 		{
-			while (pos > MIN_POS)
+			while (pos < MIN_POS)
 			{
 				setMotor(FORWARD, 255);
 
@@ -205,7 +205,8 @@ void twoButton()
 			// while (pos < pos + MAX_POS)
 			{
 				setMotor(BACKWARD, 255);
-				Serial.println("MOTOR BACKWARD");
+				// Serial.println("MOTOR BACKWARD");
+				Serial.println(pos);
 			}
 		}
 		else if (closeTable)
@@ -213,7 +214,8 @@ void twoButton()
 			// while (pos > pos - MAX_POS)
 			{
 				setMotor(FORWARD, 255);
-				Serial.println("MOTOR FORWARD");
+				// Serial.println("MOTOR FORWARD");
+				Serial.println(pos);
 			}
 		}
 
@@ -221,7 +223,7 @@ void twoButton()
 		closeTable = false;
 		isRunning = false;
 
-		Serial.println("STOPPED");
+		// Serial.println("STOPPED");
 	}
 	else
 	{
@@ -310,7 +312,7 @@ void loop()
 		return;
 	}
 
-	// oneButton();
-	twoButton();
+	oneButton();
+	// twoButton();
 	// openCloseButtons();
 }
