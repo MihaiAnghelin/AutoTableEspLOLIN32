@@ -328,15 +328,18 @@ void loop()
 				{
 					if (currentLine.length() == 0)
 					{
+						client.println("HTTP/1.1 200 OK");
+						client.println("Content-type:text/html");
+						client.println("Connection: close");
+						client.println();
+
+
 						if (header.indexOf("GET /toggle-table") >= 0)
 						{
 							toggleTableOnline = true;
 						}
 
-						client.println("HTTP/1.1 200 OK");
-						client.println("Content-type:text/html");
-						client.println("Connection: close");
-						client.println();
+						
 						client.println("<!DOCTYPE html><html>");
 						client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
 						client.println("<link rel=\"icon\" href=\"data:,\">");
@@ -344,9 +347,11 @@ void loop()
 						client.println(".button { background-color: #195B6A; border: none; color: white; padding: 16px 40px;");
 						client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
 						client.println(".button2 {background-color: #77878A;}</style></head>");
+
 						client.println("<body><h1>ESP32 Web Server</h1>");
 						client.println("<p>Click to open or close the table.</p>");
 						client.println("<p><a href=\"/toggle-table\"><button class=\"button\">TOGGLE</button></a></p>");
+
 						client.println("</body></html>");
 						client.println();
 						break;
