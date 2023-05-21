@@ -88,59 +88,6 @@ void readEncoder()
 
 #pragma endregion
 
-void PID()
-{
-	int target = 10000;
-
-	// PID constants
-	float kp = 0.5;
-	float ki = 0;
-	float kd = 0.08;
-
-	// time difference
-	long currentTime = micros();
-	float deltaT = ((float)(currentTime - previousTime)) / 1.0e6;
-	previousTime = currentTime;
-
-	// error
-	float error = -target + pos;
-
-	// integral
-	integral += error * deltaT;
-
-	// derivative
-	float derivative = (error - errorPrevious) / deltaT;
-
-	// output
-	float output = kp * error + ki * integral + kd * derivative;
-
-	// motor power
-	float pwr = fabs(output);
-
-	if (pwr > 255)
-		pwr = 255;
-
-	// motor direction
-	int dir = output >= 0 ? 1 : -1;
-
-	if (abs(target - pos) < (0.01 * target))
-	{
-		pwr = 0;
-		dir = 0;
-	}
-
-	// signal the motor
-	setMotor(dir, pwr);
-
-	// store prev error
-	errorPrevious = error;
-
-	Serial.print(target);
-	Serial.print(" ");
-	Serial.print(pos);
-	Serial.println();
-}
-
 void oneButton()
 {
 	if (digitalRead(BTN1_IN) == LOW || toggleTableOnline)
@@ -231,26 +178,6 @@ void twoButton()
 		isRunning = false;
 
 		// Serial.println("STOPPED");
-	}
-	else
-	{
-		setMotor(STOP, 0);
-	}
-}
-
-void openCloseButtons()
-{
-	if (digitalRead(BTN1_IN) == LOW)
-	{
-		setMotor(BACKWARD, 255);
-		Serial.print("BACKWARD ");
-		Serial.println(pos);
-	}
-	else if (digitalRead(BTN2_IN) == LOW)
-	{
-		setMotor(FORWARD, 255);
-		Serial.print("FORWARD ");
-		Serial.println(pos);
 	}
 	else
 	{
@@ -372,8 +299,6 @@ void loop()
 		client.stop();
 		Serial.println("Client disconnected.");
 	}
-
-	// PID();
 
 	// if the power button is turned off the motor will not be available
 	if (digitalRead(POW_IN) == HIGH)
