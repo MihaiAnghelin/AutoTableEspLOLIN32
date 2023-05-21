@@ -41,6 +41,7 @@ bool closeTable = false;
 /// Cont wifi
 const char *ssid = "DIGI-D5bj";
 const char *password = "2874qX3n";
+bool isConnected = false;
 
 WiFiServer server(80);
 
@@ -235,6 +236,10 @@ void setup()
 	pinMode(POW_OUT, OUTPUT);
 
 	attachInterrupt(digitalPinToInterrupt(ENCA), readEncoder, RISING);
+
+
+
+	
 }
 
 void loop()
@@ -261,7 +266,7 @@ void loop()
 						client.println("Connection: close");
 						client.println();
 
-						if (header.indexOf("GET /toggle-table") >= 0)
+						if (header.indexOf("GET /toggle") >= 0)
 						{
 							if (digitalRead(POW_IN) != HIGH)
 							{
@@ -270,11 +275,12 @@ void loop()
 							}
 						}
 
-						if (header.indexOf("GET /table-status") >= 0)
+						if (header.indexOf("GET /status") >= 0)
 						{
 							client.println(isOpen ? "OPEN" : "CLOSED");
 						}
 
+						header = "";
 						break;
 					}
 					else
@@ -295,12 +301,13 @@ void loop()
 	// if the power button is turned off the motor will not be available
 	if (digitalRead(POW_IN) == HIGH)
 	{
-		setMotor(STOP, 0);
-
-		return;
+		twoButton();
+	}
+	else
+	{
+		oneButton();
 	}
 
-	oneButton();
 	// twoButton();
 	// openCloseButtons();
 }
