@@ -186,33 +186,35 @@ void twoButton()
 	}
 }
 
+void loop2(void *pvParameters);
+
 void setup()
 {
 
-	pinMode(LED_BUILTIN, OUTPUT);
-	/// Conexiune Wi-Fi
-	Serial.begin(115200);
+	// pinMode(LED_BUILTIN, OUTPUT);
+	// /// Conexiune Wi-Fi
+	// Serial.begin(115200);
 
-	WiFi.mode(WIFI_STA);
-	WiFi.begin(ssid, password);
-	Serial.println("\nConnecting to WiFi Network ..");
+	// WiFi.mode(WIFI_STA);
+	// WiFi.begin(ssid, password);
+	// Serial.println("\nConnecting to WiFi Network ..");
 
-	while (WiFi.status() != WL_CONNECTED)
-	{
-		digitalWrite(LED_BUILTIN, HIGH);
-		Serial.print(".");
-		delay(100);
-		digitalWrite(LED_BUILTIN, LOW);
-		delay(100);
-	}
+	// while (WiFi.status() != WL_CONNECTED)
+	// {
+	// 	digitalWrite(LED_BUILTIN, HIGH);
+	// 	Serial.print(".");
+	// 	delay(100);
+	// 	digitalWrite(LED_BUILTIN, LOW);
+	// 	delay(100);
+	// }
 
-	digitalWrite(LED_BUILTIN, LOW);
+	// digitalWrite(LED_BUILTIN, LOW);
 
-	Serial.println("\nConnected to the WiFi network");
-	Serial.print("Local ESP32 IP: ");
-	Serial.println(WiFi.localIP());
+	// Serial.println("\nConnected to the WiFi network");
+	// Serial.print("Local ESP32 IP: ");
+	// Serial.println(WiFi.localIP());
 
-	server.begin();
+	// server.begin();
 
 	/// Configurare pini
 
@@ -237,77 +239,134 @@ void setup()
 
 	attachInterrupt(digitalPinToInterrupt(ENCA), readEncoder, RISING);
 
+	pinMode(LED_BUILTIN, OUTPUT);
+	Serial.begin(115200);
 
+	WiFi.mode(WIFI_STA);
+	xTaskCreatePinnedToCore(
+		loop2,	 // Function that should be called
+		"loop2", // Name of the task (for debugging)
+		10000,	 // Stack size (bytes)
+		NULL,	 // Parameter to pass
+		0,		 // Task priority
+		NULL,	 // Task handle
+		1		 // Core you want to run the task on (0 or 1)
+	);
+}
 
-	
+void loop2(void *pvParameters)
+{
+	while (true)
+	{
+		if (WiFi.status() == WL_CONNECTED)
+		{
+			if (!isConnected)
+			{
+				digitalWrite(LED_BUILTIN, LOW);
+
+				server.begin();
+
+				isConnected = true;
+			}
+		}
+		else
+		{
+			WiFi.begin(ssid, password);
+			Serial.println("\nConnecting to WiFi Network ..");
+			while (WiFi.status() != WL_CONNECTED)
+			{
+				digitalWrite(LED_BUILTIN, HIGH);
+				Serial.print(".");
+				delay(100);
+				digitalWrite(LED_BUILTIN, LOW);
+				delay(100);
+			}
+		}
+
+		if (!isConnected)
+			return;
+
+		WiFiClient client = server.available();
+
+		if (client)
+		{
+			Serial.println("New Client.");
+			String currentLine = "";
+			while (client.connected())
+			{
+				if (client.available())
+				{
+					char c = client.read();
+					Serial.write(c);
+					header += c;
+					if (c == '\n')
+					{
+						if (currentLine.length() == 0)
+						{
+							client.println("HTTP/1.1 200 OK");
+							client.println("Content-type:text/html");
+							client.println("Connection: close");
+							client.println();
+
+							if (header.indexOf("GET /toggle") >= 0)
+							{
+								if (digitalRead(POW_IN) != HIGH)
+								{
+									toggleTableOnline = true;
+									client.println("OK");
+								}
+							}
+
+							if (header.indexOf("GET /status") >= 0)
+							{
+								client.println(isOpen ? "OPEN" : "CLOSED");
+							}
+
+							header = "";
+							break;
+						}
+						else
+						{
+							currentLine = "";
+						}
+					}
+					else if (c != '\r')
+					{
+						currentLine += c;
+					}
+				}
+			}
+			client.stop();
+			Serial.println("Client disconnected.");
+		}
+	}
+	// if the power button is turned off the motor will not be available
+	// if (digitalRead(POW_IN) == HIGH)
+	// {
+	// 	twoButton();
+	// }
+	// else
+	// {
+	// 	oneButton();
+	// }
+
+	// twoButton();
+	// openCloseButtons();
 }
 
 void loop()
 {
-	WiFiClient client = server.available();
-
-	if (client)
-	{
-		Serial.println("New Client.");
-		String currentLine = "";
-		while (client.connected())
-		{
-			if (client.available())
-			{
-				char c = client.read();
-				Serial.write(c);
-				header += c;
-				if (c == '\n')
-				{
-					if (currentLine.length() == 0)
-					{
-						client.println("HTTP/1.1 200 OK");
-						client.println("Content-type:text/html");
-						client.println("Connection: close");
-						client.println();
-
-						if (header.indexOf("GET /toggle") >= 0)
-						{
-							if (digitalRead(POW_IN) != HIGH)
-							{
-								toggleTableOnline = true;
-								client.println("OK");
-							}
-						}
-
-						if (header.indexOf("GET /status") >= 0)
-						{
-							client.println(isOpen ? "OPEN" : "CLOSED");
-						}
-
-						header = "";
-						break;
-					}
-					else
-					{
-						currentLine = "";
-					}
-				}
-				else if (c != '\r')
-				{
-					currentLine += c;
-				}
-			}
-		}
-		client.stop();
-		Serial.println("Client disconnected.");
-	}
-
-	// if the power button is turned off the motor will not be available
+	// while (true)
+	//{
 	if (digitalRead(POW_IN) == HIGH)
 	{
+		// setMotor(STOP, 0);
+		// return;
 		twoButton();
 	}
 	else
 	{
 		oneButton();
 	}
-
-	// twoButton();
-	// openCloseButtons();
+	//}
 }
